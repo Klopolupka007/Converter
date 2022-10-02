@@ -24,51 +24,20 @@ public class App extends JPanel {
     App(){
         setSize(1080,720);
         setBackground(new Color(191, 80, 60));
-        View();
-        startBut();
-
-        FileOp = new AddFile(img, picture);
-        add(FileOp);
-        add(new pan());
-        setLayout(null);
-        setVisible(true);
-    }
-
-    //Получение пути выбранного файла
-    public String getFilePath() {
-        return FileOp.Select();
-    }
-
-    //Получение выбранного расширения
-    public String getComboBox() {
-        return (String)comboBox.getSelectedItem();
-    }
-
-    public JSONObject startBut(){
-        JSONObject json = new JSONObject();
-        try {
-            json.put("path", getFilePath());
-            json.put("format", getComboBox());
-        } catch (NullPointerException e){
-            System.err.println("Путь/формат файла пустой.");
-        }
-        return json;
-    }
-
-    //Основной функциональный дизайн и вид страницы приложения
-    void View(){
         //Добавление картинки по-умолчанию
         img = new JLabel(picture);
         img.setBackground(Color.gray);
         img.setBounds(50, 50, 600, 400);
         add(img);
-
         JLabel addFormat = new JLabel("Выберите расширение файла");
         addFormat.setBounds(670, 50, 300, 30);
         customFontColor fontsLib = new customFontColor();
         addFormat.setFont(fontsLib.FiraSans_Bold);
         add(addFormat);
 
+        //Добавление функционала выбора файла
+        FileOp = new AddFile(img, picture);
+        add(FileOp);
         //Добавление выпадающего списка расширений
         String[] components = {"psd", "tiff", "bmp", "jpeg", "gif", "eps", "png", "pict", "pdf", "pcs", "ico", "cdr",
                 "ai", "raw", "svg", "avif"};
@@ -76,25 +45,15 @@ public class App extends JPanel {
         comboBox.setBounds(670, 80, 200, 30);
         comboBox.setBackground(new Color(231, 120, 100));
         add(comboBox);
+        //Добавление функционала кнопки старта
+        add(new SaveFiles(FileOp, comboBox));
 
-        //Добавление кнопки начала работы
-        JButton start = new JButton(new ImageIcon(new ImageIcon("src/Start.png").getImage().getScaledInstance(20, 25, Image.SCALE_DEFAULT)));
-        start.setBounds(210, 470, 40, 40);
-        start.setOpaque(true);
-        start.setBackground(new Color(166, 30, 30));
-        start.setFocusPainted(false);
-        Border emptyBorder = BorderFactory.createEmptyBorder();
-        start.setBorder(emptyBorder);
-        add(start);
-        start.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println(startBut());
-            }
-        });
+        //Добавление градиента
+        add(new pan());
 
+        setLayout(null);
+        setVisible(true);
     }
-
 }
 
 //Класс визуального дизайна приложения
@@ -115,7 +74,53 @@ class pan extends JPanel{
     }
 }
 
+//Класс стартовой кнопки и сохранения файла
+class SaveFiles extends JButton implements ActionListener{
+    AddFile FileOp;
+    JComboBox comboBox;
 
+    SaveFiles(AddFile FileOp, JComboBox comboBox){
+        this.FileOp = FileOp; this.comboBox = comboBox;
+        setBounds(210, 470, 40, 40);
+        setOpaque(true);
+        setBackground(new Color(166, 30, 30));
+        setFocusPainted(false);
+        Border emptyBorder = BorderFactory.createEmptyBorder();
+        setBorder(emptyBorder);
+        setIcon(new ImageIcon(new ImageIcon("src/Start.png").getImage().getScaledInstance(20, 25, Image.SCALE_DEFAULT)));
+
+        addActionListener(this);
+    }
+
+    //Получение пути выбранного файла
+    public String getFilePath() {
+        return FileOp.Select();
+    }
+
+    //Получение выбранного расширения
+    public String getComboBox() {
+        return (String)comboBox.getSelectedItem();
+    }
+
+    //Метод получения строки типа JSON для обозначения пути выбранного файла и формата преобразования
+    public JSONObject startBut(){
+        JSONObject json = new JSONObject();
+        try {
+            json.put("path", getFilePath());
+            json.put("format", getComboBox());
+        } catch (NullPointerException e){
+            System.err.println("Путь/формат файла пустой.");
+        }
+        return json;
+    }
+
+    //Обработчик нажатия кнопки старта
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        System.out.println(startBut());
+        //Здесь может быть ваша реклама!
+    }
+}
 
 //Класс выбора файла из каталога
 class AddFile extends JButton implements ActionListener{
