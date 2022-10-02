@@ -1,8 +1,10 @@
 import org.ghost4j.document.PDFDocument;
 import org.ghost4j.renderer.SimpleRenderer;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +25,7 @@ public class App extends JPanel {
         setSize(1080,720);
         setBackground(new Color(191, 80, 60));
         View();
+        startBut();
 
         FileOp = new AddFile(img, picture);
         add(FileOp);
@@ -39,6 +42,17 @@ public class App extends JPanel {
     //Получение выбранного расширения
     public String getComboBox() {
         return (String)comboBox.getSelectedItem();
+    }
+
+    public JSONObject startBut(){
+        JSONObject json = new JSONObject();
+        try {
+            json.put("path", getFilePath());
+            json.put("format", getComboBox());
+        } catch (NullPointerException e){
+            System.err.println("Путь/формат файла пустой.");
+        }
+        return json;
     }
 
     //Основной функциональный дизайн и вид страницы приложения
@@ -62,6 +76,23 @@ public class App extends JPanel {
         comboBox.setBounds(670, 80, 200, 30);
         comboBox.setBackground(new Color(231, 120, 100));
         add(comboBox);
+
+        //Добавление кнопки начала работы
+        JButton start = new JButton(new ImageIcon(new ImageIcon("src/Start.png").getImage().getScaledInstance(20, 25, Image.SCALE_DEFAULT)));
+        start.setBounds(210, 470, 40, 40);
+        start.setOpaque(true);
+        start.setBackground(new Color(166, 30, 30));
+        start.setFocusPainted(false);
+        Border emptyBorder = BorderFactory.createEmptyBorder();
+        start.setBorder(emptyBorder);
+        add(start);
+        start.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(startBut());
+            }
+        });
+
     }
 
 }
@@ -104,14 +135,17 @@ class AddFile extends JButton implements ActionListener{
         customFontColor fontsLib = new customFontColor();
 
         setSize(150, 40);
-        setLocation(275, 470);
+        setLocation(50, 470);
         setText("Выберите файл");
 
         setFont(fontsLib.FiraSans_Bold);
         setForeground(new Color(240, 240, 240));
         setOpaque(true);
-        setHorizontalAlignment(SwingConstants.LEFT);
+        setHorizontalAlignment(SwingConstants.CENTER);
         setBackground(new Color(166, 30, 30));
+        Border emptyBorder = BorderFactory.createEmptyBorder();
+        setBorder(emptyBorder);
+
 
         fc = new JFileChooser();
         setFocusPainted(false);
@@ -202,7 +236,12 @@ class AddFile extends JButton implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int result = fc.showOpenDialog(AddFile.this);
-        Select();
+        try {
+            Select();
+        } catch (NullPointerException Exception){
+            System.err.println("Не выбран файл");
+        }
+
     }
 }
 

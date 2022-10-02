@@ -1,5 +1,5 @@
 <component name="libraryTable">
-  <library name="ghost4j" type="repository">
+  <library name="ghost" type="repository">
     <properties maven-id="org.ghost4j:ghost4j:1.0.1" />
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/org/ghost4j/ghost4j/1.0.1/ghost4j-1.0.1.jar!/" />
