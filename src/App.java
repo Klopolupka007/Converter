@@ -1,8 +1,13 @@
+import org.ghost4j.document.PDFDocument;
+import org.ghost4j.renderer.SimpleRenderer;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.beans.Customizer;
 import java.io.File;
 import java.io.IOException;
@@ -11,27 +16,57 @@ public class App extends JPanel {
 
     ImageIcon picture = new ImageIcon(new ImageIcon("src/StandartImage.png").getImage().getScaledInstance(600, 400, Image.SCALE_DEFAULT));
     JLabel img;
+    AddFile FileOp;
+    JComboBox comboBox;
+
     App(){
         setSize(1080,720);
         setBackground(new Color(191, 80, 60));
         View();
 
-        add(new AddFile(img, picture));        add(new pan());
+        FileOp = new AddFile(img, picture);
+        add(FileOp);
+        add(new pan());
         setLayout(null);
         setVisible(true);
     }
 
+    //Получение пути выбранного файла
+    public String getFilePath() {
+        return FileOp.Select();
+    }
 
-    //Основной дизайн и вид страницы приложения
+    //Получение выбранного расширения
+    public String getComboBox() {
+        return (String)comboBox.getSelectedItem();
+    }
+
+    //Основной функциональный дизайн и вид страницы приложения
     void View(){
+        //Добавление картинки по-умолчанию
         img = new JLabel(picture);
         img.setBackground(Color.gray);
         img.setBounds(50, 50, 600, 400);
         add(img);
+
+        JLabel addFormat = new JLabel("Выберите расширение файла");
+        addFormat.setBounds(670, 50, 300, 30);
+        customFontColor fontsLib = new customFontColor();
+        addFormat.setFont(fontsLib.FiraSans_Bold);
+        add(addFormat);
+
+        //Добавление выпадающего списка расширений
+        String[] components = {"psd", "tiff", "bmp", "jpeg", "gif", "eps", "png", "pict", "pdf", "pcs", "ico", "cdr",
+                "ai", "raw", "svg", "avif"};
+        comboBox = new JComboBox(components);
+        comboBox.setBounds(670, 80, 200, 30);
+        comboBox.setBackground(new Color(231, 120, 100));
+        add(comboBox);
     }
 
 }
 
+//Класс визуального дизайна приложения
 class pan extends JPanel{
     boolean state = true;
     pan(){
@@ -49,12 +84,17 @@ class pan extends JPanel{
     }
 }
 
+
+
+//Класс выбора файла из каталога
 class AddFile extends JButton implements ActionListener{
 
     JFileChooser fc;
     File SelFile;
     ImageIcon picture;
     JLabel img;
+    String[] components = {"psd", "tiff", "bmp", "jpg", "jpeg", "gif", "eps", "png", "pict", "pdf", "pcs", "ico", "cdr",
+            "ai", "raw", "svg", "avif"};
 
     AddFile(JLabel img, ImageIcon picture){
 
@@ -81,11 +121,80 @@ class AddFile extends JButton implements ActionListener{
     //Метод, который возвращает путь к выбранному файлу
     String Select(){
         SelFile = fc.getSelectedFile();
-        ImageIcon pic = new ImageIcon(new ImageIcon(SelFile.getPath()).getImage().getScaledInstance(600, 400, Image.SCALE_DEFAULT));
-        img.setIcon(pic);
-        img.setLocation(50, 50);
+        boolean state = true; StringBuilder format = new StringBuilder();
+        String Path = SelFile.getPath();
 
-        return SelFile.getPath();
+        //Проверка формата файла
+        //Срез строки пути файла до расширения
+        for (char ch : Path.toCharArray()) {
+            if (ch != '.' && state) {
+                continue;
+            }
+            else {
+                state = false;
+                if (ch != '.') format.append(ch);
+            }
+        }
+
+        if (format.toString().equals("pdf") || format.toString().equals("psd")){
+            BufferedImage bimg = null;
+            try {
+                bimg = ImageIO.read(new File("src/doc.png"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Integer[] picSize = sizeImg(bimg.getWidth(), bimg.getHeight());
+            ImageIcon pic = new ImageIcon(new ImageIcon("src/doc.png").getImage().getScaledInstance(picSize[0], picSize[1], Image.SCALE_DEFAULT));
+            img.setIcon(pic);
+            return SelFile.getPath();
+        }else {
+            //Сверка среза с шаблонами форматов
+            for (String str : components) {
+                if (str.equals(format.toString()) && !format.toString().equals("")) {
+                    state = true;
+                    break;
+                }
+            }
+        }
+        //Результат сверки
+        if (state) {
+            BufferedImage bimg = null;
+            try {
+                bimg = ImageIO.read(new File(SelFile.getPath()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Integer[] picSize = sizeImg(bimg.getWidth(), bimg.getHeight());
+            ImageIcon pic = new ImageIcon(new ImageIcon(SelFile.getPath()).getImage().getScaledInstance(picSize[0], picSize[1], Image.SCALE_DEFAULT));
+            img.setIcon(pic);
+            img.setLocation(50, 50);
+            return SelFile.getPath();
+        }
+        else {
+            JOptionPane.showMessageDialog(this,"Invalid format of selected file. Choose it again.","Error: Invalid format", JOptionPane.ERROR_MESSAGE);
+            img.setIcon(picture);
+            return "Error: Invalid format of selected file.";
+        }
+    }
+
+    //Подбор значений размера изображения
+    Integer[] sizeImg(int x, int y){
+        Integer[] size = new Integer[2];
+        double prop, y1=y, x1=x;
+        if (x>y){
+            prop = (double) y/(double)x;
+            while (x1 < 600) x1++;
+            while (x1 > 600) x1--;
+            y1 = (int) (x1*prop);
+        } else {
+            prop = (double) x/(double)y;
+            while (y1 < 400) y1++;
+            while (y1 > 400) y1--;
+            x1 = (int) (y1*prop);
+        }
+
+        size[0] = (int)x1;size[1] = (int)y1;
+        return size;
     }
 
     //Метод выбора файла из файловой локальной системы
@@ -93,7 +202,7 @@ class AddFile extends JButton implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int result = fc.showOpenDialog(AddFile.this);
-        System.out.println(Select());
+        Select();
     }
 }
 
