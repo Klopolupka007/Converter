@@ -13,6 +13,7 @@ public class Main extends JFrame {
         setIconImage(img.getImage());
         setTitle("Конвертер графических приложений");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setResizable(false);
         setLocationRelativeTo(null);
         setVisible(true);
     }

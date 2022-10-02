@@ -30,11 +30,24 @@ public class App extends JPanel {
         img.setBounds(50, 50, 600, 400);
         add(img);
         JLabel addFormat = new JLabel("Выберите расширение файла");
+        addFormat.setForeground(new Color(240, 240, 240));
         addFormat.setBounds(670, 50, 300, 30);
         customFontColor fontsLib = new customFontColor();
         addFormat.setFont(fontsLib.FiraSans_Bold);
         add(addFormat);
 
+        JLabel[] des = new JLabel[2];
+        for (int i = 0; i < 2; i++){
+            des[i] = new JLabel();
+            if (i == 0){
+                des[i].setBounds(50, 50, 600, 400);
+            } else{
+                des[i].setBounds(660, 50, 350, 400);
+            }
+            des[i].setOpaque(true);
+            des[i].setBackground(new Color(150, 30, 30));
+            add(des[i]);
+        }
         //Добавление функционала выбора файла
         FileOp = new AddFile(img, picture);
         add(FileOp);
@@ -44,6 +57,7 @@ public class App extends JPanel {
         comboBox = new JComboBox(components);
         comboBox.setBounds(670, 80, 200, 30);
         comboBox.setBackground(new Color(231, 120, 100));
+        comboBox.setToolTipText("name format");
         add(comboBox);
         //Добавление функционала кнопки старта
         add(new SaveFiles(FileOp, comboBox));
@@ -66,7 +80,6 @@ class pan extends JPanel{
     }
     public void paint(Graphics g) {
             Graphics2D g2 = (Graphics2D) g;
-
             GradientPaint gradientPaint = new GradientPaint(0, 0, new Color(191, 80, 60),
                     0, 220, new Color(161, 50, 30));
             g2.setPaint(gradientPaint);
@@ -119,6 +132,11 @@ class SaveFiles extends JButton implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         System.out.println(startBut());
         //Здесь может быть ваша реклама!
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showSaveDialog(SaveFiles.this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            // save to file
+        }
     }
 }
 
