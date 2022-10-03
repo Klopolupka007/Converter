@@ -117,8 +117,19 @@ class SaveFiles extends JButton implements ActionListener{
     //Обработчик нажатия кнопки старта
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println(startBut());
-        //Здесь может быть ваша реклама!
+        //Вычленяем путь и новый формат (для удобства)
+        String path = startBut().get("path").toString();
+        String format = startBut().get("format").toString();
+        //Сохраняем путь до нового файла в переменной newFileName
+        String newFileName = Converter.convert(path, format);
+        //Делай с ним все, что хочешь)
+        System.out.println(newFileName);
+        //Телеграмма из центра дошла до Штирлица не сразу. Пришлось перечитывать.
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showSaveDialog(SaveFiles.this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            // save to file
+        }
     }
 }
 
@@ -269,5 +280,32 @@ class customFontColor{
         } catch(FontFormatException e) {
             e.printStackTrace();
         }
+    }
+}
+
+//Класс, который будет творить магию
+class Converter{
+    public static String convert(String path, String format) {
+        BufferedImage bufferedImage;
+        try {
+            //Считываем изображение в буфер
+            bufferedImage = ImageIO.read(new File(path));
+
+            // создаем пустое изображение RGB, с тай же шириной высотой и белым фоном
+            BufferedImage newBufferedImage = new BufferedImage(bufferedImage.getWidth(),
+                    bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+            newBufferedImage.createGraphics().drawImage(bufferedImage, 0, 0, Color.WHITE, null);
+
+            // записываем новое изображение в формате jpg
+            String newPath = path + "." + format;
+
+            ImageIO.write(newBufferedImage, format, new File(newPath));
+
+            return newPath;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
